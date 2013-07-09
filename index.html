@@ -2,22 +2,33 @@
 <html>
 <head>
   <title>PaperGraph</title>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <!--<script src="jquery.js"></script>-->
+  <script src="paper_data"></script>
   <script src="arbor/lib/arbor.js"> </script>
   <script src="arbor/lib/arbor-tween.js"> </script>
   <script src="main.js"> </script>
 
   <style>
-   #body { height : 100%; overflow: auto;}
+   body { height : 100%; overflow: auto;}
+   header { overflow: auto;} 
+   a {color:blue;}
    #viewport {display:block; margin: 20px auto; border: thin solid black;}
    #sidebar {float:left; min-width: 235px; overflow: auto;}
    ul { border: thin solid black; margin: 20px; padding: 4px; overflow: auto;}
    ul > lh { font-weight: bold; border-bottom: thin solid black; overflow: auto; }
-   .minimizer {float : right; font-size: 11px; padding-bottom: 2px; border:thin solid black; border-radius: 3px; box-shadow: 1px 1px 3px #AFAFaf; cursor: pointer; line-height: 1.3em; width: 1.1em; text-align:center; margin: 2px;}
+   .minimizer {float : right; font-size: 11px; border:thin solid black; border-radius: 3px; box-shadow: 1px 1px 3px #AFAFaf; cursor: pointer; line-height: 1.3em; width: 1.1em; text-align:center; margin: 2px;}
+   #topbox {float : right; margin: 8px;}
   </style>
 </head>
 <body>
+<header>
+<div id="topbox">
+<label>Paper Source : <input id="src_filename" value="paper_data" /> </label> <br/>
+<a href="paper_create.html">Create</a>
+</div>
 <h1> /candidacy/paper_graph </h1>
+</header>
 <hr>
 <div id='sidebar'>
 <label>Currently Near:</label> <span id="nearest"></span>
@@ -26,7 +37,7 @@
 <li></li>
 </ul>
 <ul id='file_list'>
-<lh>Loaded Files <span class="minimizer">&mu;</span></lh>
+<lh>Loaded Files <span class="minimizer">&#x25BE;</span></lh>
 <li></li>
 </ul>
 </div>

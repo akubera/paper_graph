@@ -109,6 +109,25 @@
             _mouseP = arbor.Point(e.pageX-pos.left, e.pageY-pos.top)
             dragged = particleSystem.nearest(_mouseP);
 
+            // Shift key is pressed
+            if (e.shiftKey) {
+
+//              console.log('doc.key',e,last_mouse_position.x,last_mouse_position.y);
+//             if (last_mouse_position.x == NaN) return;
+//             var m_pos = arbor.Point(last_mouse_position.x-pos.left, last_mouse_position.y-pos.top)
+                var near_pt = dragged;// particleSystem.nearest(m_pos);
+                if (!(typeof near_pt === "undefined" || near_pt == null || near_pt.distance > 20)) {
+                    var list = $("ul#selected_list")[0];
+                    if ($(list).html().indexOf(near_pt.node.name) == -1) {
+                        $(list).append("<li>" + near_pt.node.name + "</li>");
+                    }                    
+                }
+            
+            }
+
+
+
+
             if (dragged && dragged.node !== null){
               // while we're dragging, don't let physics move the node
               dragged.node.fixed = true
@@ -117,7 +136,7 @@
             $(canvas).bind('mousemove', handler.dragged)
             $(window).bind('mouseup', handler.dropped)
 
-            console.log("clicked",dragged.node.name);
+            console.log("clicked", e);
 
             return false
           },
@@ -201,56 +220,98 @@
     sys.parameters({gravity:true}) // use center-gravity to make the graph settle nicely (ymmv)
     sys.renderer = Renderer("#viewport") // our newly created renderer will have its .init() method called shortly by sys...
 
-    // get papers
-    $.get("all_papers", function(data) {
+    var paper_filename = $("#src_filename").val();
 
-        console.log('data', typeof data, data);
-        for (x in data) {
-            $($("#file_list").append("<li> <input type='checkbox' data-nodename='" + x + "' /> " + x + "</li>"));
-            if (stop-- == 0) break;
+    // get papers
+//     $.get(paper_filename, _load_data, 'json').fail(function(e) { alert("jquery.GET error : problem with filename " + paper_filename); console.error(e);});
+
+
+    function data_source_change() {
+       var d_filename = $("#src_filename").val();
+        $("head").append('<script src="'+d_filename+'"></script>');
+    }
+    
+    $("#src_filename").change(data_source_change);
+    data_source_change();
+
+    function _load_data(data_list) {
+          console.log(data_list);
+          var _lock = false;
+          var j = 0;
+          var data_obj = {};
+          for (j = 0; j < data_list.length; j++) {
+            var data = data_list[j];
+            console.log('data', typeof data, data);
+        
+            for (x in data) {
+                $($("#file_list").append("<li> <input type='checkbox' data-nodename='" + x + "' /> " + x + "</li>"));
+                if (stop-- == 0) break;
+            }
+            data_obj[x] = data[x];
+          }
+      
+          $("#file_list input").change(_file_list_action);
+
+          function _file_list_action (e) {
+                var box = $(e.target);
+
+                // it's been locked by another check - switch state and return
+                if (_lock == true) {
+                    $(box).prop("checked", !$(box).is(':checked') );
+                    return;
+                }
+            
+                // lock to not be interrupted
+                _lock = true;
+
+                // get the name of the node stored in the element
+                var x = $(box).data('nodename');
+                var i = 0;
+
+                console.log("Adding object : ", x, "to the graph.");
+
+                // if we have just checked it - add the file to the graph
+                if ($(box).is(':checked')) {
+                    for (i = 0; i < data_obj[x].length; i++) {
+                        sys.addEdge(x, data_obj[x][i]);
+                    }
+                } else {
+                    // uncheck - remove node
+                    var lost_edges = sys.getEdgesFrom(x);
+                    var saved_edges = sys.getEdgesTo(x);
+                    var position = sys.getNode(x)._p;
+                
+                    // Removes all edges
+                    sys.pruneNode(x);
+                
+                    // store (with same position) just in case
+                    var saved_node = sys.addNode(x, {x : position.x, y : position.y});
+
+                    // loop through all the edges we just removed and check if the target is alone 
+                    for (i = 0; i < lost_edges.length; i++) {
+                        var next = lost_edges[i].target;
+                        // nothing pointing to and not pointing to anything - remove
+                        if (sys.getEdgesTo(next).length === 0 && sys.getEdgesFrom(next).length === 0) {
+                            sys.pruneNode(next);
+                        }
+                    }
+                
+                    // these are things pointing to the deleted node bring them back
+                    for (i = 0; i < saved_edges.length; i++) {
+                      var e = saved_edges[i];
+                      sys.addEdge(e.source.name, e.target.name);
+                    }
+                    if (saved_edges.length === 0) sys.pruneNode(saved_node);
+                }
+            
+                // hurray - done with this action, unlock
+                _lock = false;
+             }
+         
         }
 
-        var _lock = false;
+    _load_data(gData);
 
-        $("#file_list input").change(function(e) {
-            var box = $(e.target);
-
-            // it's been locked by another check - switch state and return
-            if (_lock == true) {
-                $(box).prop("checked", !$(box).is(':checked') );
-                return;
-            }
-            
-            // lock to not be interrupted
-            _lock = true;
-
-            // get the name of the node stored in the element
-            var x = $(box).data('nodename');
-                            var i = 0;
-
-            // if we have just checked it - add the file to the graph
-            if ($(box).is(':checked')) {
-                console.log("Adding file : ", x, "to the graph.");
-                for (i = 0; i < data[x].length; i++) {
-                    sys.addEdge(x, data[x][i]);
-                }
-            } else {
-                // uncheck - remove node
-                var lost_edges = sys.getEdgesFrom(x);
-                sys.pruneNode(x);
-                for (i = 0; i < lost_edges.length; i++) {
-                    var next = lost_edges[i].target;
-                    if (sys.getEdgesTo(next).length === 0 && sys.getEdgesFrom(next).length === 0) {
-                        sys.pruneNode(next);
-                    }
-//                    if (sys.getEdges
-                }
-            }
-            
-            // hurray - done with this action, unlock
-            _lock = false;
-         });
-    }, 'json');
 
     // Don't do anything else
     return;
@@ -288,4 +349,5 @@ $(function(){
      console.log($(e.target).closest("ul").children("li").toggle({speed:'fast'}));}
      );
 });
+
 var sys;

@@ -2,13 +2,17 @@
 <html>
 <head>
  <title>Paper Create</title>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
  <script>
   var regexs = {
 //         "<span style='color:blue'>$1</span>" : /[^0-9]([0-9]{1,6})[^0-9]/g,
-//         "<span style='color:red'>$1</span>" : /([a-z]\{2,\}-[a-z]\{2\}\/[0-9]{7})/gm,
-         "<span style='color:red'>$1</span>" : /([a-z]{2,}-[a-z]{2}\/[0-9]{7,})/gm,
-         "<span style='color:blue'>$1</span>" : /[\s]*([^0-9][0-9]{4})/gm,
+          " <span style='color:red'>$1</span> " : /([a-z]{2,}-[a-z]{2}\/[0-9]{7,})/gm,
+          // matches Phys.Rev.C58:2321,1998 
+//           "<span style='color:lightblue'>$1</span>" : /(Phys\.Rev\.[A-D][0-9]+:([0-9]+),[0-9]{4})?/gm,
+//           "<span style='color:lightgreen'>$1</span>" : /(Phys\.Rev\.[A-D][0-9]+:?([0-9]+)(:?,[0-9]{4})?)/gm,
+//           "<span style='color:lightgreen'>$1</span>" : /(Phys\.Rev\.Lett\.([0-9]+):?([0-9]+)(:?,[0-9]{4})?)/gm,
+//           "<span style='color:lightgreen'>$1</span>" : /(Phys\.Rev\.Lett\.,[A-D]([0-9]+),[0-9]+(:?,[0-9]{4})?)/gm
+//         "<span style='color:blue'>$1</span>" : /[\s]*([^0-9][0-9]{4})/gm,
         };
         
   $(function(){
@@ -37,8 +41,7 @@
     for (replacer in regexs) {
       var reg = regexs[replacer];
       res = res.replace(reg, replacer);
-  //    console.log("matching : ", replacer, reg, res);
-  
+//     break;
 
     }
          
@@ -49,6 +52,12 @@
    
    function output(e) {
       var input = $("#input_text").val();
+      var fid = $("#filename").val();
+      if (fid === "") {
+        alert("Missing paper id");
+        return;
+      }
+
       var res = [];
       for (replacer in regexs) {
         var reg = regexs[replacer];
@@ -58,7 +67,7 @@
         console.log(res);
       }
       var result = {};
-      result[$("#filename").val()] = res;
+      result[fid] = res;
       $("#output").text(JSON.stringify(result));
    }
  </script>
@@ -66,7 +75,7 @@
 <body>
  <h1>Paper Create</h1> 
  <hr>
-This File : <input id="filename" />  <table style="margin: 15px auto;">
+This Paper Id : <input id="filename" />  <table style="margin: 15px auto;">
   <tr>
     <td> Input <br> <textarea id="input_text" rows="40" cols="30"> </textarea> </td>
     <td> <button id="click_to_process" >Find</button> </td>
