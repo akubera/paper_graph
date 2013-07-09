@@ -4,19 +4,75 @@
  <title>Paper Create</title>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
  <script>
+  var regexs = {
+//         "<span style='color:blue'>$1</span>" : /[^0-9]([0-9]{1,6})[^0-9]/g,
+//         "<span style='color:red'>$1</span>" : /([a-z]\{2,\}-[a-z]\{2\}\/[0-9]{7})/gm,
+         "<span style='color:red'>$1</span>" : /([a-z]{2,}-[a-z]{2}\/[0-9]{7,})/gm,
+         "<span style='color:blue'>$1</span>" : /[\s]*([^0-9][0-9]{4})/gm,
+        };
+        
+  $(function(){
+    $("#click_to_process").click(process);
+    $("#click_to_output").click(output);
+    $("document").resize(_autosize);
+    
+    function _autosize(e) {
+        console.log('sizemore', $(".autosize"), $("#input_text").height());
+        $(".autosize").height( $("#input_text").height());
+        $(".autosize").width( $("#input_text").width());
+        }
+    _autosize(null);  
+  });
+ 
    function process(e) {
-     console.log($("#input_text"));
+
+    var input = $("#input_text").val();
+      console.log(regexs);
+
+    //console.log('INPUT : ',input);
+
+    var res = input.replace(['/</', '/>/'], ['&lt;', '&gt;']);
+
+    // process the input
+    for (replacer in regexs) {
+      var reg = regexs[replacer];
+      res = res.replace(reg, replacer);
+  //    console.log("matching : ", replacer, reg, res);
+  
+
+    }
+         
+     //console.log("END: " , res);
+     
+     $('#middle').html(res);
+   }
+   
+   function output(e) {
+      var input = $("#input_text").val();
+      var res = [];
+      for (replacer in regexs) {
+        var reg = regexs[replacer];
+        var m = input.match(reg);
+        console.log(m, res);
+        res = res.concat(m);
+        console.log(res);
+      }
+      var result = {};
+      result[$("#filename").val()] = res;
+      $("#output").text(JSON.stringify(result));
    }
  </script>
 </head>
 <body>
  <h1>Paper Create</h1> 
  <hr>
- <table style="margin: 15px auto;">
+This File : <input id="filename" />  <table style="margin: 15px auto;">
   <tr>
     <td> Input <br> <textarea id="input_text" rows="40" cols="30"> </textarea> </td>
-    <td> <button onclick="process()" >Find</button> </td>
-    <td> Output <br> <textarea rows="40" cols="30" readonly> </textarea> </td>
+    <td> <button id="click_to_process" >Find</button> </td>
+    <td> Scanned <br> <div  class="autosize" id="middle" style="height:40pt; border:thin solid grey; font:small monospace; overflow: scroll;" rows="40" cols="30" readonly> </div> </td>
+    <td> <button id="click_to_output" >Reduce</button> </td>
+    <td> Output <br> <textarea id="output" rows="40" cols="30" readonly> </textarea> </td>
   </tr>
  </table>   
 </body>
