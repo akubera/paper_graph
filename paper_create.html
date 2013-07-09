@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head>
+ <title>Paper Create</title>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+ <script>
+   function process(e) {
+     console.log($("#input_text"));
+   }
+ </script>
+</head>
+<body>
+ <h1>Paper Create</h1> 
+ <hr>
+ <table style="margin: 15px auto;">
+  <tr>
+    <td> Input <br> <textarea id="input_text" rows="40" cols="30"> </textarea> </td>
+    <td> <button onclick="process()" >Find</button> </td>
+    <td> Output <br> <textarea rows="40" cols="30" readonly> </textarea> </td>
+  </tr>
+ </table>   
+</body>
+</html>
+
+
